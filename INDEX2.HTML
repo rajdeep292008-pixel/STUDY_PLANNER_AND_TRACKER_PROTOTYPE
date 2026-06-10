@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate AI Study Hub v3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-primary: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        /* Themes */
+        body.theme-amoled {
+            --bg-dark: #000000;
+            --panel-bg: #111111;
+            --border-color: #222222;
+        }
+        body.theme-cyberpunk {
+            --bg-dark: #0f051d;
+            --panel-bg: #1a0b2e;
+            --accent-primary: #ff007f;
+            --accent-hover: #d4006b;
+            --border-color: #3d1466;
+            --text-main: #00ffff;
+        }
+        body.theme-forest {
+            --bg-dark: #0b130e;
+            --panel-bg: #142219;
+            --accent-primary: #10b981;
+            --accent-hover: #059669;
+            --border-color: #1f3a2b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* --- LAYOUT STRUCTURE --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        /* --- TIMERS & CONTROLS --- */
+        .timer-card {
+            background: linear-gradient(135deg, #1e1b4b, #2e1065);
+            border: 1px solid #4c1d95;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+        }
+
+        body.theme-cyberpunk .timer-card {
+            background: linear-gradient(135deg, #20002c, #cbb4d4);
+            border: 1px solid var(--accent-primary);
+        }
+
+        .timer-modes {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin: 10px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--accent-hover); }
+        .btn-secondary { background: #334155; }
+        .btn-secondary:hover { background: #475569; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* --- SOUND MACHINE --- */
+        .sound-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .sound-control {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sound-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sound-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .sound-control input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+        }
+
+        /* --- DASHBOARD ELEMENTS --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-lbl {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* --- PANELS --- */
+        .content-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"], select, textarea {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        body.theme-amoled input, body.theme-amoled select, body.theme-amoled textarea {
+            background: #000000;
+        }
+
+        input[type="text"] { flex: 1; }
+        textarea { resize: none; height: 100%; min-height: 140px; }
+
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        body.theme-amoled .task-item { background: #000; }
+
+        .task-left { display: flex; align-items: center; gap: 12px; }
+        .task-checkbox { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+        .completed-text { text-decoration: line-through; color: var(--text-muted); }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .tag-study { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .tag-work { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-weight: 600; }
+
+        /* --- FLASHCARD SYSTEM CONTAINER --- */
+        .flashcard-arena {
+            perspective: 1000px;
+            width: 100%;
+            height: 180px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard-arena.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .flashcard-front {
+            background: #2563eb;
+            color: white;
+        }
+        .flashcard-back {
+            background: #1e3a8a;
+            color: #60a5fa;
+            transform: rotateY(180deg);
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .modal.open { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .setting-row input, .setting-row select { width: 120px; text-align: center; }
+        
+        .mic-active {
+            animation: pulse-red 1.5s infinite;
+            background: var(--danger) !important;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 64, 64, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 64, 64, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 64, 64, 0); }
+        }
+
+        /* --- COPYRIGHT BOX DISPLAY --- */
+        .copyright-box {
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <h2 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-sliders"></i> Ambience & Focus
+            </h2>
+            <div class="sound-grid">
+                <div class="sound-control">
+                    <div class="sound-header">
+                        <span class="sound-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Soft Rain</span>
+                        <input type="checkbox" id="chk-rain" onchange="toggleAudio('rain')">
+                    </div>
+                    <input type="range" id="vol-rain" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume('rain')">
+                </div>
+                <div class="sound-control">
+                    <div class="sound-header">
+                        <span class="sound-title"><i class="fa-solid fa-wave-square"></i> White Noise</span>
+                        <input type="checkbox" id="chk-noise" onchange="toggleAudio('noise')">
+                    </div>
+                    <input type="range" id="vol-noise" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume('noise')">
+                </div>
+                <div class="sound-control">
+                    <div class="sound-header">
+                        <span class="sound-title"><i class="fa-solid fa-mug-saucer"></i> Indie Cafe</span>
+                        <input type="checkbox" id="chk-cafe" onchange="toggleAudio('cafe')">
+                    </div>
+                    <input type="range" id="vol-cafe" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume('cafe')">
+                </div>
+                <div class="sound-control">
+                    <div class="sound-header">
+                        <span class="sound-title"><i class="fa-solid fa-brain"></i> Binaural Beats (10Hz)</span>
+                        <input type="checkbox" id="chk-binaural" onchange="toggleAudio('binaural')">
+                    </div>
+                    <input type="range" id="vol-binaural" min="0" max="1" step="0.1" value="0.3" oninput="updateVolume('binaural')">
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color);">
+
+        <div>
+            <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-palette"></i> Visual Theme</h3>
+            <select id="theme-selector" style="width: 100%;" onchange="changeTheme()">
+                <option value="default">Default Slate</option>
+                <option value="amoled">Pure AMOLED Black</option>
+                <option value="cyberpunk">Cyberpunk Neon</option>
+                <option value="forest">Quiet Forest</option>
+            </select>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color);">
+
+        <div>
+            <h3 style="margin-bottom: 12px;">Quick Quotes</h3>
+            <p id="quote-box" style="font-size: 0.9rem; color: var(--text-muted); font-style: italic; line-height: 1.4;">
+                "Focus is a muscle, and you are building it right now."
+            </p>
+        </div>
+
+        <div class="copyright-box">
+            <i class="fa-regular fa-copyright"></i> 2026. All Rights Reserved.
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <section class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-fire"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-streak">1 Day</div>
+                    <div class="stat-lbl">Daily Streak</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-total-time">0m</div>
+                    <div class="stat-lbl">Total Focused Time</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-tasks">0/0</div>
+                    <div class="stat-lbl">Tasks Completed</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="timer-card">
+            <div class="timer-modes">
+                <button class="mode-btn active" onclick="setTimerMode('pomodoro')">Pomodoro</button>
+                <button class="mode-btn" onclick="setTimerMode('shortBreak')">Short Break</button>
+                <button class="mode-btn" onclick="setTimerMode('longBreak')">Long Break</button>
+            </div>
+            
+            <div class="timer-display" id="timer-string">25:00</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;" id="timer-status-text">Time to lock in!</div>
+
+            <div class="timer-actions">
+                <button class="btn" id="btn-start" onclick="toggleTimer()">
+                    <i class="fa-solid fa-play"></i> Start
+                </button>
+                <button class="btn btn-secondary" onclick="resetTimer()">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+                <button class="btn btn-secondary" onclick="openSettings()">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+            </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <section class="content-panel">
+                <h3>Task Manager</h3>
+                <div class="input-group">
+                    <input type="text" id="task-input" placeholder="What are you working on?">
+                    <select id="task-tag">
+                        <option value="study">Study</option>
+                        <option value="work">Work</option>
+                    </select>
+                    <button class="btn" onclick="addTask()"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <ul class="task-list" id="task-list-element"></ul>
+            </section>
+
+            <section class="content-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3><i class="fa-solid fa-book-open"></i> Scratchpad & Summary Journal</h3>
+                    <button class="btn btn-secondary" id="btn-mic" onclick="toggleDictation()" style="padding: 6px 12px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-microphone"></i> Dictate Notes
+                    </button>
+                </div>
+                <textarea id="scratchpad" placeholder="Type quick lecture summaries here... Click 'Dictate Notes' to use your voice microphone natively for free!" oninput="saveScratchpad()"></textarea>
+            </section>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; min-height: 0; flex: 1;">
+            <section class="content-panel">
+                <h3><i class="fa-solid fa-layer-group"></i> Active Recall Flashcard Arena</h3>
+                <div class="input-group">
+                    <input type="text" id="fc-front" placeholder="Question / Front">
+                    <input type="text" id="fc-back" placeholder="Answer / Back">
+                    <button class="btn" onclick="addFlashcard()"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+                
+                <div class="flashcard-arena" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front" id="card-front-display">Create a flashcard above to start drilling memory!</div>
+                        <div class="flashcard-back" id="card-back-display">Click card to flip over.</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                    <button class="btn btn-secondary" onclick="navigateCards(-1)"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+                    <span id="card-index-indicator" style="font-size: 0.85rem; color: var(--text-muted);">Deck empty</span>
+                    <button class="btn btn-secondary" onclick="navigateCards(1)">Next <i class="fa-solid fa-arrow-right"></i></button>
+                    <button class="btn btn-danger" onclick="deleteCurrentCard()" style="padding: 8px 12px;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </section>
+
+            <section class="content-panel" style="overflow-y: auto;">
+                <h3>Analytics Log</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Session Type</th>
+                                <th>Duration</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-log-rows"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h3>Custom Settings</h3>
+            <div class="setting-row">
+                <label>Pomodoro (min):</label>
+                <input type="number" id="cfg-pomo" value="25">
+            </div>
+            <div class="setting-row">
+                <label>Short Break (min):</label>
+                <input type="number" id="cfg-short" value="5">
+            </div>
+            <div class="setting-row">
+                <label>Long Break (min):</label>
+                <input type="number" id="cfg-long" value="15">
+            </div>
+            <div class="setting-row">
+                <label>Voice Assistant:</label>
+                <select id="cfg-voice">
+                    <option value="on">Enabled</option>
+                    <option value="off">Disabled</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn" style="flex:1;" onclick="saveSettings()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AudioEngine = {
+            ctx: null, sources: {}, gains: {},
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            createNoiseBuffer(type) {
+                const bufferSize = 2 * this.ctx.sampleRate;
+                const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                let lastOut = 0.0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    if (type === 'pink') {
+                        output[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = output[i]; output[i] *= 3.5;
+                    } else if (type === 'brown') {
+                        output[i] = (lastOut + (0.05 * white)) / 1.05; lastOut = output[i]; output[i] *= 3.5;
+                    } else { output[i] = white; }
+                }
+                return noiseBuffer;
+            },
+            startSound(key, type) {
+                this.init(); if (this.sources[key]) return;
+                
+                if (key === 'binaural') {
+                    const merger = this.ctx.createChannelMerger(2);
+                    
+                    const oscL = this.ctx.createOscillator();
+                    oscL.type = 'sine';
+                    oscL.frequency.setValueAtTime(140, this.ctx.currentTime);
+                    
+                    const oscR = this.ctx.createOscillator();
+                    oscR.type = 'sine';
+                    oscR.frequency.setValueAtTime(150, this.ctx.currentTime);
+
+                    const gainNode = this.ctx.createGain();
+                    gainNode.gain.setValueAtTime(document.getElementById(`vol-binaural`).value, this.ctx.currentTime);
+
+                    oscL.connect(merger, 0, 0);
+                    oscR.connect(merger, 0, 1);
+                    merger.connect(gainNode);
+                    gainNode.connect(this.ctx.destination);
+
+                    oscL.start(); oscR.start();
+                    this.sources[key] = { oscL, oscR, stop() { oscL.stop(); oscR.stop(); } };
+                    this.gains[key] = gainNode;
+                    return;
+                }
+
+                const source = this.ctx.createBufferSource();
+                source.buffer = this.createNoiseBuffer(type); source.loop = true;
+                const filter = this.ctx.createBiquadFilter();
+                if (key === 'rain') { filter.type = 'lowpass'; filter.frequency.setValueAtTime(700, this.ctx.currentTime); }
+                else if (key === 'cafe') { filter.type = 'bandpass'; filter.frequency.setValueAtTime(900, this.ctx.currentTime); }
+                const gainNode = this.ctx.createGain();
+                gainNode.gain.setValueAtTime(document.getElementById(`vol-${key}`).value, this.ctx.currentTime);
+                source.connect(filter); filter.connect(gainNode); gainNode.connect(this.ctx.destination);
+                source.start(); this.sources[key] = source; this.gains[key] = gainNode;
+            },
+            stopSound(key) { if (this.sources[key]) { try { this.sources[key].stop(); } catch(e){} delete this.sources[key]; delete this.gains[key]; } },
+            setVolume(key, val) { if (this.gains[key]) this.gains[key].gain.setValueAtTime(val, this.ctx.currentTime); },
+            speak(text) {
+                if (document.getElementById('cfg-voice').value === 'off') return;
+                const msg = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(msg);
+            }
+        };
+
+        function toggleAudio(type) {
+            if (document.getElementById(`chk-${type}`).checked) {
+                const noiseMap = { 'rain': 'brown', 'noise': 'pink', 'cafe': 'pink', 'binaural': 'sine' };
+                AudioEngine.startSound(type, noiseMap[type]);
+            } else { AudioEngine.stopSound(type); }
+        }
+        function updateVolume(type) { AudioEngine.setVolume(type, document.getElementById(`vol-${type}`).value); }
+    </script>
+
+    <script>
+        let recognition = null;
+        let isDictating = false;
+
+        function initDictationEngine() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Voice dictation is not fully supported in this browser structure. Use Google Chrome or Microsoft Edge.");
+                return false;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                const notebook = document.getElementById('scratchpad');
+                notebook.value += (notebook.value ? ' ' : '') + transcript;
+                saveScratchpad();
+            };
+
+            recognition.onerror = (e) => { console.error("Dictation pipeline error: ", e); stopDictation(); };
+            recognition.onend = () => { stopDictation(); };
+            return true;
+        }
+
+        function toggleDictation() {
+            if (!recognition) { if (!initDictationEngine()) return; }
+            if (isDictating) { stopDictation(); } else { startDictation(); }
+        }
+        function startDictation() {
+            isDictating = true;
+            document.getElementById('btn-mic').classList.add('mic-active');
+            document.getElementById('btn-mic').innerHTML = `<i class="fa-solid fa-microphone-slash"></i> Stop Listening`;
+            recognition.start();
+        }
+        function stopDictation() {
+            isDictating = false;
+            document.getElementById('btn-mic').classList.remove('mic-active');
+            document.getElementById('btn-mic').innerHTML = `<i class="fa-solid fa-microphone"></i> Dictate Notes`;
+            if (recognition) try { recognition.stop(); } catch(e){}
+        }
+    </script>
+
+    <script>
+        let state = {
+            timer: null, isRunning: false, currentMode: 'pomodoro', timeLeft: 1500,
+            durations: { pomodoro: 1500, shortBreak: 300, longBreak: 900 },
+            tasks: [], history: [], flashcards: [], currentCardIdx: 0,
+            totalFocusMinutes: 0, streakCount: 1, voiceEnabled: 'on', theme: 'default'
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+            updateTimerDisplay();
+            renderTasks();
+            renderHistory();
+            renderFlashcard();
+            updateDashboardStats();
+            rotateQuotes();
+        });
+
+        function loadAllData() {
+            const cached = localStorage.getItem('study_hub_v3_data');
+            if (cached) {
+                const p = JSON.parse(cached);
+                state.durations = p.durations || state.durations;
+                state.tasks = p.tasks || [];
+                state.history = p.history || [];
+                state.flashcards = p.flashcards || [];
+                state.totalFocusMinutes = p.totalFocusMinutes || 0;
+                state.streakCount = p.streakCount || 1;
+                state.voiceEnabled = p.voiceEnabled || 'on';
+                state.theme = p.theme || 'default';
+                state.timeLeft = state.durations[state.currentMode];
+                
+                document.getElementById('cfg-voice').value = state.voiceEnabled;
+                document.getElementById('theme-selector').value = state.theme;
+                document.body.className = state.theme === 'default' ? '' : `theme-${state.theme}`;
+            }
+            const localNotes = localStorage.getItem('study_hub_v3_notes');
+            if (localNotes) document.getElementById('scratchpad').value = localNotes;
+        }
+
+        function saveAllData() {
+            localStorage.setItem('study_hub_v3_data', JSON.stringify({
+                durations: state.durations, tasks: state.tasks, history: state.history, flashcards: state.flashcards,
+                totalFocusMinutes: state.totalFocusMinutes, streakCount: state.streakCount,
+                voiceEnabled: state.voiceEnabled, theme: state.theme
+            }));
+        }
+
+        function saveScratchpad() { localStorage.setItem('study_hub_v3_notes', document.getElementById('scratchpad').value); }
+        
+        function changeTheme() { 
+            const themeVal = document.getElementById('theme-selector').value;
+            state.theme = themeVal; 
+            document.body.className = themeVal === 'default' ? '' : `theme-${themeVal}`; 
+            saveAllData(); 
+        }
+
+        /* Timer Block Engine */
+        function setTimerMode(mode) {
+            clearInterval(state.timer); state.isRunning = false;
+            state.currentMode = mode; state.timeLeft = state.durations[mode];
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            
+            // Fixed reference to event targeting
+            if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+            
+            const strings = { pomodoro: "Time to lock in!", shortBreak: "Take a breather.", longBreak: "Unwind for a bit." };
+            document.getElementById('timer-status-text').innerText = strings[mode];
+            document.getElementById('btn-start').innerHTML = `<i class="fa-solid fa-play"></i> Start`;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(state.timeLeft / 60).toString().padStart(2, '0');
+            const s = (state.timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-string').innerText = `${m}:${s}`;
+            document.title = `(${m}:${s}) Study Hub`;
+        }
+
+        function toggleTimer() {
+            if (state.isRunning) {
+                clearInterval(state.timer); state.isRunning = false;
+                document.getElementById('btn-start').innerHTML = `<i class="fa-solid fa-play"></i> Start`;
+            } else {
+                AudioEngine.init(); state.isRunning = true;
+                document.getElementById('btn-start').innerHTML = `<i class="fa-solid fa-pause"></i> Pause`;
+                state.timer = setInterval(() => {
+                    if (state.timeLeft > 0) { state.timeLeft--; updateTimerDisplay(); } 
+                    else { handleCompletion(); }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(state.timer); state.isRunning = false;
+            state.timeLeft = state.durations[state.currentMode];
+            document.getElementById('btn-start').innerHTML = `<i class="fa-solid fa-play"></i> Start`;
+            updateTimerDisplay();
+        }
+
+        function handleCompletion() {
+            clearInterval(state.timer); state.isRunning = false;
+            if (state.currentMode === 'pomodoro') {
+                const mins = Math.floor(state.durations.pomodoro / 60); state.totalFocusMinutes += mins;
+                logHistory('Pomodoro Session Completed', `${mins}m`);
+                AudioEngine.speak("Great work. Study cycle concluded. Take a break.");
+            } else {
+                logHistory('Break Session Complete', `${Math.floor(state.durations[state.currentMode] / 60)}m`);
+                AudioEngine.speak("Break is over. Ready to begin your next session.");
+            }
+            setTimerMode(state.currentMode === 'pomodoro' ? 'shortBreak' : 'pomodoro');
+            updateDashboardStats(); saveAllData();
+        }
+
+        /* Task Manager Core Operations */
+        function addTask() {
+            const input = document.getElementById('task-input'); if (!input.value.trim()) return;
+            state.tasks.push({ id: Date.now(), text: input.value.trim(), tag: document.getElementById('task-tag').value, completed: false });
+            input.value = ''; renderTasks(); updateDashboardStats(); saveAllData();
+        }
+        function toggleTask(id) { const t = state.tasks.find(x => x.id === id); if (t) t.completed = !t.completed; renderTasks(); updateDashboardStats(); saveAllData(); }
+        function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); renderTasks(); updateDashboardStats(); saveAllData(); }
+        function renderTasks() {
+            const container = document.getElementById('task-list-element'); container.innerHTML = '';
+            state.tasks.forEach(t => {
+                const li = document.createElement('li'); li.className = 'task-item';
+                li.innerHTML = `<div class="task-left">
+                    <input type="checkbox" class="task-checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})">
+                    <span class="${t.completed ? 'completed-text' : ''}">${t.text}</span>
+                    <span class="tag tag-${t.tag}">${t.tag}</span>
+                </div><i class="fa-solid fa-trash text-muted" style="cursor:pointer;" onclick="deleteTask(${t.id})"></i>`;
+                container.appendChild(li);
+            });
+        }
+
+        /* Flashcard Logic Deck Subsystems */
+        function addFlashcard() {
+            const front = document.getElementById('fc-front'); const back = document.getElementById('fc-back');
+            if (!front.value.trim() || !back.value.trim()) return;
+            state.flashcards.push({ front: front.value.trim(), back: back.value.trim() });
+            state.currentCardIdx = state.flashcards.length - 1;
+            front.value = ''; back.value = '';
+            renderFlashcard(); saveAllData();
+        }
+
+        function renderFlashcard() {
+            document.querySelector('.flashcard-arena').classList.remove('flipped');
+            const ind = document.getElementById('card-index-indicator');
+            if (state.flashcards.length === 0) {
+                document.getElementById('card-front-display').innerText = "Create a flashcard above to start drilling memory!";
+                document.getElementById('card-back-display').innerText = "Click card to flip over.";
+                ind.innerText = "Deck empty";
+                return;
+            }
+            const card = state.flashcards[state.currentCardIdx];
+            document.getElementById('card-front-display').innerText = card.front;
+            document.getElementById('card-back-display').innerText = card.back;
+            ind.innerText = `Card ${state.currentCardIdx + 1} of ${state.flashcards.length}`;
+        }
+
+        function navigateCards(dir) {
+            if (state.flashcards.length === 0) return;
+            state.currentCardIdx += dir;
+            if (state.currentCardIdx >= state.flashcards.length) state.currentCardIdx = 0;
+            if (state.currentCardIdx < 0) state.currentCardIdx = state.flashcards.length - 1;
+            renderFlashcard();
+        }
+
+        function deleteCurrentCard() {
+            if (state.flashcards.length === 0) return;
+            state.flashcards.splice(state.currentCardIdx, 1);
+            if (state.currentCardIdx >= state.flashcards.length && state.currentCardIdx > 0) state.currentCardIdx--;
+            renderFlashcard(); saveAllData();
+        }
+
+        /* Logging Subsystems */
+        function logHistory(type, dur) { state.history.unshift({ type: type, duration: dur, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); renderHistory(); }
+        function renderHistory() {
+            const container = document.getElementById('history-log-rows'); container.innerHTML = state.history.length === 0 ? `<tr><td colspan="3" style="color:var(--text-muted); text-align:center;">No tracking logs recorded yet.</td></tr>` : '';
+            state.history.forEach(h => {
+                const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${h.type}</strong></td><td>${h.duration}</td><td>${h.time}</td>`;
+                container.appendChild(tr);
+            });
+        }
+
+        function updateDashboardStats() {
+            const done = state.tasks.filter(t => t.completed).length;
+            document.getElementById('stat-tasks').innerText = `${done}/${state.tasks.length}`;
+            document.getElementById('stat-total-time').innerText = `${state.totalFocusMinutes}m`;
+            document.getElementById('stat-streak').innerText = `${state.streakCount} Days`;
+        }
+
+        function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+        function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+        function saveSettings() {
+            state.durations.pomodoro = parseInt(document.getElementById('cfg-pomo').value) * 60;
+            state.durations.shortBreak = parseInt(document.getElementById('cfg-short').value) * 60;
+            state.durations.longBreak = parseInt(document.getElementById('cfg-long').value) * 60;
+            state.voiceEnabled = document.getElementById('cfg-voice').value;
+            saveAllData(); resetTimer(); closeSettings();
+        }
+
+        function rotateQuotes() {
+            const q = ["\"Focus is a muscle, and you are building it right now.\"", "\"Deep work transforms difficult processing into effortless insight.\"", "\"Small increments of continuous concentration produce grand long term skills.\""];
+            document.getElementById('quote-box').innerText = q[Math.floor(Math.random() * q.length)];
+            setTimeout(rotateQuotes, 60000);
+        }
+    </script>
+</body>
+</html>
