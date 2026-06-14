@@ -66,3 +66,7 @@ The suite runs entirely client-side with **zero third-party dependencies** or in
 ## 📄 License & Copyright
 
 **Copyright (c) 2026. All Rights Reserved.** This software and underlying architecture are the exclusive property of the developer. Unauthorized copying, modification, or distribution via any medium is strictly prohibited.
+
+---
+
+Made with 💚 with the help of AI.
