@@ -1,6 +1,8 @@
 #STUDY_PLANNER_AND_TRACKER_PROTOTYPE:-
 
-This is a tech environment made with the help of A.I. tools to help students in their studies
+This is a tech environment made with the help of A.I. tools to help students in their studies.
+
+[CLICK HERE TO RUN IT]( https://rajdeep292008-pixel.github.io/STUDY_PLANNER_AND_TRACKER_PROTOTYPE/)
 ___________________________________________________________________________________________________________________________________________________________________
 
 # STUDY_PLANNER_AND_TRACKER_PROTOTYPE (v3)
